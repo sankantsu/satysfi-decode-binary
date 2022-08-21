@@ -1,0 +1,23 @@
+@require: stdjareport
+@import: decode-binary
+
+let num-iter = 3000
+let text = {The quick brown fox jumps over the lazy dog.}
+let-rec repeat n x = if n <= 0 then [] else (x :: (repeat (n - 1) x))
+let long-text =
+  repeat num-iter text
+    |> List.fold-left (fun lhs rhs -> {#lhs; #rhs;}) {}
+
+in
+
+document (|
+  title = {Decode binary digits};
+  author = {sankantsu};
+|) '<
+   +p {
+     #long-text;
+   }
+   +p {
+     001011: \decode@ ~(@`0010a1`);
+   }
+>

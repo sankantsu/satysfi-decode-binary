@@ -1,0 +1,56 @@
+@stage: 0
+@require: list
+@require: base/char
+@require: base/string
+
+module DecodeBinary0 : sig
+
+  val decode : input-position * string -> int
+
+end = struct
+
+  type digit-char =
+  | Digit of int
+  | UnknownCharacter
+
+  type result-type =
+  | DecodeVal of int
+  | ErrorPos of int
+
+  let decode-char ch =
+    let char-0 = Char.make `0` in
+    let char-1 = Char.make `1` in
+      if Char.equal ch char-0 then
+        Digit(0)
+      else if Char.equal ch char-1 then
+        Digit(1)
+      else
+        UnknownCharacter
+
+  let decode-str str =
+    let char-lst = String.to-list str in
+    let-rec aux (acc,pos) lst =
+      match lst with
+      | [] -> DecodeVal(acc)
+      | ch :: tail -> (
+          match decode-char ch with
+          | Digit(b) ->
+              let accnew = 2*acc + b in
+                aux (accnew, pos + 1) tail
+          | UnknownCharacter -> ErrorPos(pos))
+    in
+    aux (0,0) char-lst
+
+  let decode (ipos,str) =
+    let (fname,line,col) = get-input-position ipos in
+    let res = decode-str str in
+    match res with
+    | DecodeVal(value) -> value
+    | ErrorPos(pos) ->
+        let error-msg =
+          fname ^ `:` ^ (arabic line) ^ `:` ^ (arabic (col + pos + 1)) ^ `: `#
+          ^ `error of decode-binary: invalid symbol`
+        in
+        abort-with-message error-msg
+
+end

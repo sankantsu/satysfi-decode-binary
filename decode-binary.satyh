@@ -1,0 +1,6 @@
+@stage: 1
+@import: decode-binary0
+
+let-inline \decode@ ~posstr =
+  let num-str = arabic (~(lift-int (DecodeBinary0.decode posstr))) in
+    embed-string num-str
