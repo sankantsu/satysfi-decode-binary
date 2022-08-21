@@ -11,11 +11,11 @@ end = struct
 
   type digit-char =
   | Digit of int
-  | UnknownCharacter
+  | UnknownCharacter of Char.t
 
   type result-type =
   | DecodeVal of int
-  | ErrorPos of int
+  | ErrorPos of int * Char.t
 
   let decode-char ch =
     let char-0 = Char.make `0` in
@@ -25,7 +25,7 @@ end = struct
       else if Char.equal ch char-1 then
         Digit(1)
       else
-        UnknownCharacter
+        UnknownCharacter(ch)
 
   let decode-str str =
     let char-lst = String.to-list str in
@@ -37,7 +37,7 @@ end = struct
           | Digit(b) ->
               let accnew = 2*acc + b in
                 aux (accnew, pos + 1) tail
-          | UnknownCharacter -> ErrorPos(pos))
+          | UnknownCharacter(ch) -> ErrorPos(pos,ch))
     in
     aux (0,0) char-lst
 
@@ -46,10 +46,11 @@ end = struct
     let res = decode-str str in
     match res with
     | DecodeVal(value) -> value
-    | ErrorPos(pos) ->
+    | ErrorPos(pos,ch) ->
         let error-msg =
           fname ^ `:` ^ (arabic line) ^ `:` ^ (arabic (col + pos + 1)) ^ `: `#
-          ^ `error of decode-binary: invalid symbol`
+          ^ `error of decode-binary: invalid character`
+          ^ #` '` ^ (Char.to-string ch) ^ `'`
         in
         abort-with-message error-msg
 
